@@ -4,9 +4,9 @@ import github from "../../assets/github.svg";
 
 import styles from "./Layout.module.css";
 
-import { useLogin } from "../../authConfig";
+// import { useLogin } from "../../authConfig";
 
-import { LoginButton } from "../../components/LoginButton";
+// import { LoginButton } from "../../components/LoginButton";
 
 const Layout = () => {
     return (
@@ -14,9 +14,10 @@ const Layout = () => {
             <header className={styles.header} role={"banner"}>
                 <div className={styles.headerContainer}>
                     <Link to="/" className={styles.headerTitleContainer}>
-                        <h3 className={styles.headerTitle}>GPT + Enterprise data | Sample</h3>
+                        {/* <h3 className={styles.headerTitle}>Whiddon</h3> */}
+                        <img src="https://d3iejrrnx79bo4.cloudfront.net/TRuskvdDfoOGqAvyjyWm.png" alt="Logo" style={{ height: "30px" }} />
                     </Link>
-                    <nav>
+                    <nav style={{ display: "none" }}>
                         <ul className={styles.headerNavList}>
                             <li>
                                 <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
@@ -43,7 +44,7 @@ const Layout = () => {
                         </ul>
                     </nav>
                     <h4 className={styles.headerRightText}>Azure OpenAI + Cognitive Search</h4>
-                    {useLogin && <LoginButton />}
+                    {/* {useLogin && <LoginButton />} */}
                 </div>
             </header>
 
