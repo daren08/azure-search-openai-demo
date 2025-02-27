@@ -7,6 +7,7 @@ import { useLogin } from "../../authConfig";
 
 import { LoginButton } from "../../components/LoginButton";
 import { IconButton } from "@fluentui/react";
+import { Info24Regular } from "@fluentui/react-icons";
 
 const Layout = () => {
     const { t } = useTranslation();
@@ -36,46 +37,29 @@ const Layout = () => {
 
     return (
         <div className={styles.layout}>
-            <header className={styles.header} role={"banner"}>
-                <div className={styles.headerContainer} ref={menuRef}>
-                    <Link to="/" className={styles.headerTitleContainer}>
-                        <h3 className={styles.headerTitle}>{t("headerTitle")}</h3>
-                    </Link>
-                    <nav>
-                        <ul className={`${styles.headerNavList} ${menuOpen ? styles.show : ""}`}>
-                            <li>
-                                <NavLink
-                                    to="/"
-                                    className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}
-                                    onClick={() => setMenuOpen(false)}
-                                >
-                                    {t("chat")}
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink
-                                    to="/qa"
-                                    className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}
-                                    onClick={() => setMenuOpen(false)}
-                                >
-                                    {t("qa")}
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </nav>
-                    <div className={styles.loginMenuContainer}>
-                        {useLogin && <LoginButton />}
-                        <IconButton
-                            iconProps={{ iconName: "GlobalNavButton" }}
-                            className={styles.menuToggle}
-                            onClick={toggleMenu}
-                            ariaLabel={t("labels.toggleMenu")}
-                        />
-                    </div>
+            {/* Sidebar */}
+            <aside className={styles.sidebar}>
+                <div className={styles.logoSection}>
+                    <p>Powered by</p>
+                    <img src="/pow_whiddon.svg" alt="Whiddon logo" className={styles.logo} />
                 </div>
-            </header>
 
-            <Outlet />
+                <button className={styles.newChatBtn}>+ New Chat</button>
+            </aside>
+
+            {/* Main content area */}
+            <div className={styles.main}>
+                {/* Top bar */}
+                <header className={`${styles.header} flex items-center`} style={{ justifyContent: "space-between" }}>
+                    <h1 className={styles.headerTitle}>Assistant.AI</h1>
+                    <Info24Regular style={{ color: "#4ec0ad" }} />
+                </header>
+
+                {/* Whatever the rest of your routes/pages are */}
+                <div className={styles.content}>
+                    <Outlet />
+                </div>
+            </div>
         </div>
     );
 };
