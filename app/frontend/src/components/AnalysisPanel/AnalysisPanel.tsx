@@ -1,4 +1,4 @@
-import { Stack, Pivot, PivotItem } from "@fluentui/react";
+import { Stack, Pivot, PivotItem, Modal, DefaultButton } from "@fluentui/react";
 import { useTranslation } from "react-i18next";
 import styles from "./AnalysisPanel.module.css";
 
@@ -28,6 +28,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
     const isDisabledSupportingContentTab: boolean = !answer.context.data_points;
     const isDisabledCitationTab: boolean = !activeCitation;
     const [citation, setCitation] = useState("");
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const client = useLogin ? useMsal().instance : undefined;
     const { t } = useTranslation();
@@ -49,11 +50,12 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
                 citationObjectUrl += "#" + originalHash;
             }
             setCitation(citationObjectUrl);
+            setIsModalVisible(true); // Open the modal when a citation is fetched
         }
     };
     useEffect(() => {
         fetchCitation();
-    }, []);
+    }, [activeCitation]);
 
     const renderFileViewer = () => {
         if (!activeCitation) {
@@ -72,32 +74,47 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
     };
 
     return (
-        <Pivot
-            className={className}
-            selectedKey={activeTab}
-            onLinkClick={pivotItem => pivotItem && onActiveTabChanged(pivotItem.props.itemKey! as AnalysisPanelTabs)}
-        >
-            <PivotItem
-                itemKey={AnalysisPanelTabs.ThoughtProcessTab}
-                headerText={t("headerTexts.thoughtProcess")}
-                headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
+        <>
+            <Pivot
+                className={className}
+                selectedKey={activeTab}
+                onLinkClick={pivotItem => pivotItem && onActiveTabChanged(pivotItem.props.itemKey! as AnalysisPanelTabs)}
             >
-                <ThoughtProcess thoughts={answer.context.thoughts || []} />
-            </PivotItem>
-            <PivotItem
-                itemKey={AnalysisPanelTabs.SupportingContentTab}
-                headerText={t("headerTexts.supportingContent")}
-                headerButtonProps={isDisabledSupportingContentTab ? pivotItemDisabledStyle : undefined}
+                <PivotItem
+                    itemKey={AnalysisPanelTabs.ThoughtProcessTab}
+                    headerText={t("headerTexts.thoughtProcess")}
+                    headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
+                >
+                    <ThoughtProcess thoughts={answer.context.thoughts || []} />
+                </PivotItem>
+                <PivotItem
+                    itemKey={AnalysisPanelTabs.SupportingContentTab}
+                    headerText={t("headerTexts.supportingContent")}
+                    headerButtonProps={isDisabledSupportingContentTab ? pivotItemDisabledStyle : undefined}
+                >
+                    <SupportingContent supportingContent={answer.context.data_points} />
+                </PivotItem>
+                <PivotItem
+                    itemKey={AnalysisPanelTabs.CitationTab}
+                    headerText={t("headerTexts.citation")}
+                    headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
+                />
+            </Pivot>
+
+            <Modal
+                isOpen={isModalVisible}
+                onDismiss={() => setIsModalVisible(false)}
+                isBlocking={false}
+                containerClassName={styles.customModal}
             >
-                <SupportingContent supportingContent={answer.context.data_points} />
-            </PivotItem>
-            <PivotItem
-                itemKey={AnalysisPanelTabs.CitationTab}
-                headerText={t("headerTexts.citation")}
-                headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
-            >
-                {renderFileViewer()}
-            </PivotItem>
-        </Pivot>
+                <div className={styles.modalHeader}>
+                    <span>{t("headerTexts.citation")}</span>
+                    <DefaultButton onClick={() => setIsModalVisible(false)} text="Close" />
+                </div>
+                <div className={styles.modalBody}>
+                    {renderFileViewer()}
+                </div>
+            </Modal>
+        </>
     );
 };

@@ -13,7 +13,7 @@ interface Props {
 export const ClearChatButton = ({ className, disabled, onClick }: Props) => {
     const { t, i18n } = useTranslation();
     return (
-        <div className={`${styles.container} ${className ?? ""}`}>
+        <div className={`${styles.container} ${className ?? ""}`} style={{display: disabled ? 'none' : ''}}>
             <Button icon={<Delete24Regular />} disabled={disabled} onClick={onClick}>
                 {t("clearChat")}
             </Button>

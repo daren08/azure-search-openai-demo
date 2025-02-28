@@ -40,11 +40,10 @@ const Layout = () => {
             {/* Sidebar */}
             <aside className={styles.sidebar}>
                 <div className={styles.logoSection}>
-                    <p>Powered by</p>
                     <img src="/pow_whiddon.svg" alt="Whiddon logo" className={styles.logo} />
                 </div>
 
-                <button className={styles.newChatBtn}>+ New Chat</button>
+                <button className={styles.newChatBtn} style={{display: 'none'}}>+ New Chat</button>
             </aside>
 
             {/* Main content area */}
