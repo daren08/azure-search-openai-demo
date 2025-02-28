@@ -64,6 +64,7 @@
 }
 
 .customModal {
+    overflow: hidden;
     width: 50% !important;
     max-width: none !important;
     min-width: none !important;
