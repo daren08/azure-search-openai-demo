@@ -293,6 +293,8 @@ const Chat = () => {
     };
 
     const onToggleTab = (tab: AnalysisPanelTabs, index: number) => {
+        console.log(tab);
+        setActiveCitation(undefined);
         if (activeAnalysisPanelTab === tab && selectedAnswer === index) {
             setActiveAnalysisPanelTab(undefined);
         } else {
@@ -331,10 +333,10 @@ const Chat = () => {
     return (
         <div className={styles.container}>
             <div className={styles.commandsContainer}>
-            <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
             </div>
 
-            <div className={styles.commandsContainer} style={{display: 'none'}}>
+            <div className={styles.commandsContainer} style={{ display: 'none' }}>
                 <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                 {showUserUpload && <UploadFile className={styles.commandButton} disabled={!isLoggedIn(client)} />}
                 <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />

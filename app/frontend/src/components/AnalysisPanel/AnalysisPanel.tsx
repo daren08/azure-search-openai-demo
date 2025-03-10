@@ -1,4 +1,6 @@
-import { Stack, Pivot, PivotItem, Modal, IconButton } from "@fluentui/react";
+import { Stack, Pivot, PivotItem, Modal } from "@fluentui/react";
+import { IconButton } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
 
@@ -31,7 +33,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
 
     const client = useLogin ? useMsal().instance : undefined;
 
-
     const fetchCitation = async () => {
         const token = client ? await getToken(client) : undefined;
         if (activeCitation) {
@@ -55,6 +56,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
     }, [activeCitation]);
 
     const renderFileViewer = () => {
+        console.log("active citation: " + activeCitation);
         if (!activeCitation) {
             return null;
         }
@@ -70,58 +72,58 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
         }
     };
 
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        //  onActiveTabChanged(undefined as unknown as AnalysisPanelTabs); // Update activeCitation to undefined
+    };
+
     return (
         <>
-            <Pivot
-                className={className}
-                selectedKey={activeTab}
-                onLinkClick={pivotItem => pivotItem && onActiveTabChanged(pivotItem.props.itemKey! as AnalysisPanelTabs)}
+            {!activeCitation && (
+                <Pivot
+                    className={className}
+                    selectedKey={activeTab}
+                    onLinkClick={pivotItem => pivotItem && onActiveTabChanged(pivotItem.props.itemKey! as AnalysisPanelTabs)}
+                >
+                    {/* <PivotItem
+                        itemKey={AnalysisPanelTabs.ThoughtProcessTab}
+                        headerText="Thought process"
+                        headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
+                    >
+                        <ThoughtProcess thoughts={answer.context.thoughts || []} />
+                    </PivotItem> */}
+                    <PivotItem
+                        itemKey={AnalysisPanelTabs.SupportingContentTab}
+                        headerText="Supporting content"
+                        headerButtonProps={isDisabledSupportingContentTab ? pivotItemDisabledStyle : undefined}
+                    >
+                        <SupportingContent supportingContent={answer.context.data_points} />
+                    </PivotItem>
+                    {/* <PivotItem
+                        itemKey={AnalysisPanelTabs.CitationTab}
+                        headerText="Citation"
+                        headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
+                    >
+                    </PivotItem>*/}
+                </Pivot>
+            )}
+            <Modal
+                isOpen={isModalOpen}
+                onDismiss={handleModalClose}
+                isBlocking={false}
+                containerClassName={styles.customModal}
+                scrollableContentClassName={styles.noScrollModal} // Removes internal scroll
             >
-                {/* <PivotItem
-                    itemKey={AnalysisPanelTabs.ThoughtProcessTab}
-                    headerText="Thought process"
-                    headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
-                >
-                    <ThoughtProcess thoughts={answer.context.thoughts || []} />
-                </PivotItem> */}
-                <PivotItem
-                    itemKey={AnalysisPanelTabs.SupportingContentTab}
-                    headerText="Supporting content"
-                    headerButtonProps={isDisabledSupportingContentTab ? pivotItemDisabledStyle : undefined}
-                >
-                    <SupportingContent supportingContent={answer.context.data_points} />
-                </PivotItem>
-               {/* <PivotItem
-                    itemKey={AnalysisPanelTabs.CitationTab}
-                    headerText="Citation"
-                    headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
-                >
-                </PivotItem>*/}
-            </Pivot>
-            {/* <Modal isOpen={isModalOpen} onDismiss={() => setIsModalOpen(false)} isBlocking={false} containerClassName={styles.modalContainer}>
                 <div className={styles.modalHeader}>
-                    <IconButton iconProps={{ iconName: "Cancel" }} ariaLabel="Close popup modal" onClick={() => setIsModalOpen(false)} />
+                    <IconButton onClick={handleModalClose}><Close /></IconButton>
                 </div>
-                <div className={styles.modalBody}>{renderFileViewer()}</div>
-            </Modal> */}
-<Modal
-    isOpen={isModalOpen}
-    onDismiss={() => setIsModalOpen(false)}
-    isBlocking={false}
-    containerClassName={styles.customModal}
-    scrollableContentClassName={styles.noScrollModal} // Removes internal scroll
->
-    <div className={styles.modalHeader}>
-        <IconButton iconProps={{ iconName: "Cancel" }} ariaLabel="Close popup modal" onClick={() => setIsModalOpen(false)} />
-    </div>
-    <div className={styles.modalBody}>
-        <div className={styles.pdfViewerContainer}>
-            {renderFileViewer()}
-        </div>
-    </div>
-</Modal>
-
-
+                <div className={styles.modalBody}>
+                    <div className={styles.pdfViewerContainer}>
+                        {renderFileViewer()}
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 };

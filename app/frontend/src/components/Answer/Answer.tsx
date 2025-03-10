@@ -1,5 +1,7 @@
-import { useMemo } from "react";
-import { Stack, IconButton } from "@fluentui/react";
+import { useMemo, useState, useEffect } from "react";
+import { Stack, Modal, TextField, PrimaryButton, DefaultButton } from "@fluentui/react";
+import { IconButton } from "@mui/material";
+import { Lightbulb, Assignment, ThumbUp, ThumbDown } from "@mui/icons-material"
 import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
@@ -8,12 +10,13 @@ import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { SpeechOutputBrowser } from "./SpeechOutputBrowser";
 import { SpeechOutputAzure } from "./SpeechOutputAzure";
+import style from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark";
 
 interface Props {
     answer: ChatAppResponse;
     isSelected?: boolean;
     isStreaming: boolean;
-    onCitationClicked: (filePath: string) => void;
+    onCitationClicked: (filePath: string, showSidePanel?: boolean) => void;
     onThoughtProcessClicked: () => void;
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
@@ -36,11 +39,63 @@ export const Answer = ({
     showSpeechOutputBrowser,
     speechUrl
 }: Props) => {
+    const [like, setLike] = useState<boolean | null>(null);
+    const [dislike, setDislike] = useState<boolean | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [reason, setReason] = useState<string>("");
+    const [isSupportingContentVisible, setIsSupportingContentVisible] = useState<boolean>(false);
+
     const followupQuestions = answer.context?.followup_questions;
     const messageContent = answer.message.content;
     const parsedAnswer = useMemo(() => parseAnswerToHtml(messageContent, isStreaming, onCitationClicked), [answer]);
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
+
+    const handleLikeClick = () => {
+        if (like) {
+            setLike(null);
+        } else {
+            setLike(true);
+            setDislike(null);
+        }
+        console.log("Liked");
+    };
+
+    const handleDislikeClick = () => {
+        if (dislike) {
+            setDislike(null);
+        } else {
+            setDislike(true);
+            setLike(null);
+            setIsModalOpen(true);
+        }
+        console.log("Disliked");
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setReason("");
+    };
+
+    const handleReasonChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+        setReason(newValue || "");
+    };
+
+    const handleSubmitReason = () => {
+        console.log("Reason for dislike:", reason);
+        handleModalClose();
+    };
+
+    const handleSupportingContentClick = () => {
+        setIsSupportingContentVisible(!isSupportingContentVisible);
+        onSupportingContentClicked();
+    };
+
+    useEffect(() => {
+        if (!isModalOpen) {
+            setIsSupportingContentVisible(false);
+        }
+    }, [isModalOpen]);
 
     return (
         <Stack className={`${styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
@@ -49,21 +104,20 @@ export const Answer = ({
                     <AnswerIcon />
                     <div>
                         <IconButton
-                            style={{ color: "black" }}
-                            iconProps={{ iconName: "Lightbulb" }}
-                            title="Show thought process"
-                            ariaLabel="Show thought process"
-                            onClick={() => onThoughtProcessClicked()}
-                            disabled={!answer.context.thoughts?.length}
-                        />
-                        <IconButton
-                            style={{ color: "black" }}
-                            iconProps={{ iconName: "ClipboardList" }}
-                            title="Show supporting content"
-                            ariaLabel="Show supporting content"
-                            onClick={() => onSupportingContentClicked()}
+                            title={isSupportingContentVisible ? "Hide supporting content" : "Show supporting content"}
+                            onClick={handleSupportingContentClick}
                             disabled={!answer.context.data_points}
-                        />
+                        ><Assignment /></IconButton>
+                        <IconButton
+                            style={{ color: like ? "#f36f4c" : "#727272" }}
+                            title="Like"
+                            onClick={handleLikeClick}
+                        ><ThumbUp /></IconButton>
+                        <IconButton
+                            style={{ color: dislike ? "#f36f4c" : "#727272" }}
+                            title="Dislike"
+                            onClick={handleDislikeClick}
+                        ><ThumbDown /></IconButton>
                         {showSpeechOutputAzure && <SpeechOutputAzure url={speechUrl} />}
                         {showSpeechOutputBrowser && <SpeechOutputBrowser answer={sanitizedAnswerHtml} />}
                     </div>
@@ -81,7 +135,7 @@ export const Answer = ({
                         {parsedAnswer.citations.map((x, i) => {
                             const path = getCitationFilePath(x);
                             return (
-                                <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path)}>
+                                <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path, false)}>
                                     {`${++i}. ${x}`}
                                 </a>
                             );
@@ -104,6 +158,32 @@ export const Answer = ({
                     </Stack>
                 </Stack.Item>
             )}
+
+            <Modal
+                isOpen={isModalOpen}
+                onDismiss={handleModalClose}
+                isBlocking={false}
+                containerClassName={styles.modalContainer}
+            >
+                <div className={styles.modalHeader}>
+                    <h2>Reason for Dislike</h2>
+                </div>
+                <div className={styles.modalBody}>
+                    <TextField
+                        label="Please provide a reason for your dislike:"
+                        multiline
+                        rows={3}
+                        value={reason}
+                        onChange={handleReasonChange}
+                    />
+                </div>
+                <div className={styles.modalFooter}>
+                    <Stack horizontal tokens={{ childrenGap: 10 }}>
+                        <DefaultButton onClick={handleSubmitReason} text="Submit" className={styles.modalSubmitBtn} />
+                        <DefaultButton onClick={handleModalClose} text="Cancel" className={styles.modalCloseBtn} />
+                    </Stack>
+                </div>
+            </Modal>
         </Stack>
     );
 };

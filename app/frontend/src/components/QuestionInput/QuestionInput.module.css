@@ -38,7 +38,7 @@
 }
 
 div > input{
-    background-color: #f2f2f2 !important;
+    background-color: #E7E6E6 !important;
 }
 
 /* Wrapper for input + send button */
@@ -46,7 +46,7 @@ div > input{
     width: 100%;
     display: flex;
     align-items: center;
-    background-color: #f2f2f2; /* Slightly darker than outer container */
+    background-color: #E7E6E6; /* Slightly darker than outer container */
     border-radius: 30px; /* Rounded edges */
     padding: 5px 15px;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
@@ -55,11 +55,11 @@ div > input{
 /* Input field */
 .questionInputTextArea {
     flex-grow: 1;
-    background: #f2f2f2;
+    background: #E7E6E6;
     border: none;
     font-size: 16px;
     font-family: 'Poppins', sans-serif;
-    color: #333;
+    color: #342E37;
     padding: 12px;
     border-radius: 25px;
 }
@@ -86,6 +86,6 @@ div > input{
 
 /* Send Icon */
 .sendIcon {
-    color: #3a3a3a; /* Dark gray */
+    color: #342E37; /* Dark gray */
     font-size: 24px;
 }

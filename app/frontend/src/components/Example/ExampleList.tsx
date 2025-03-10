@@ -3,9 +3,10 @@ import { Example } from "./Example";
 import styles from "./Example.module.css";
 
 const DEFAULT_EXAMPLES: string[] = [
-    "What is included in my Northwind Health Plus plan that is not in standard?",
-    "What happens in a performance review?",
-    "What does a Product Manager do?"
+    // "What is included in my Northwind Health Plus plan that is not in standard?",
+    "What's in RAC Grief  Bereavement Protocol 24?",
+    "What happens in a GOV Dignity of Risk Policy 2024?",
+    "Summarize Infection Control Policy?"
 ];
 
 const GPT4V_EXAMPLES: string[] = [
@@ -21,6 +22,7 @@ interface Props {
 
 export const ExampleList = ({ onExampleClicked, useGPT4V }: Props) => {
     const backgroundColors = ["#4ec0ad", "#f36f4c", "#e3e0d1"];  
+    const fonColors = ["#342E37", "#F2F2F2", "#342E37"];
 
     return (
         <ul className={styles.examplesNavList}>
@@ -28,6 +30,7 @@ export const ExampleList = ({ onExampleClicked, useGPT4V }: Props) => {
                 <li key={i}>
                     <Example text={question} value={question} 
                     bgColor={backgroundColors[i % backgroundColors.length]} 
+                    fontColor={fonColors[i % fonColors.length]}
                     onClick={onExampleClicked} />
                 </li>
             ))}

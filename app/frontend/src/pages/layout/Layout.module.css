@@ -4,10 +4,10 @@
     height: 100vh;
 }
 
-.header {
+/* .header {
     background-color: #222222;
     color: #f2f2f2;
-}
+} */
 
 .headerContainer {
     display: flex;
@@ -120,22 +120,22 @@
 
 
 /* Main Content */
-.mainContent {
-    margin-left: 200px; /* Offset for sidebar */
+/*.mainContent {
+    margin-left: 200px;  // offset sidebar
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-}
+}*/
 
 /* Header */
-.header {
+/* .header {
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 15px 20px;
     border-bottom: 1px solid #e0e0e0;
-}
+} */
 
 .headerTitle {
     font-size: 20px;
@@ -144,12 +144,12 @@
 }
 
 /* Info Icon */
-.infoIcon {
+/* .infoIcon {
     font-size: 24px;
     color: #1abc9c;
     cursor: pointer;
     margin-top: 10px;
-}
+} */
 
 /* Page Content */
 .pageContent {
@@ -227,4 +227,88 @@
     border-radius: 5px;
     width: 10vh;
     cursor: pointer;
+}
+
+
+/*Whiddon*/
+.mainContent {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: #4ec0ad;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.infoIcon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.profilePicture {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    cursor: pointer;
+}
+/*END : Whiddon*/
+
+
+.profileWrapper {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.initialsAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #0078D4;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.popover {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.logoutButton {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+.logoutButton:hover {
+    background-color: #d9363e;
 }
