@@ -1,8 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
 import { Stack, Modal, TextField, PrimaryButton, DefaultButton } from "@fluentui/react";
-import { IconButton } from "@mui/material";
+import { IconButton, Button as MUIButton } from "@mui/material";
 import { Lightbulb, Assignment, ThumbUp, ThumbDown } from "@mui/icons-material"
 import DOMPurify from "dompurify";
+import axios from "axios";
+import { toast, ToastContainer } from 'react-toastify'; // Import react-toastify
 
 import styles from "./Answer.module.css";
 import { ChatAppResponse, getCitationFilePath } from "../../api";
@@ -13,6 +15,7 @@ import { SpeechOutputAzure } from "./SpeechOutputAzure";
 import style from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark";
 
 interface Props {
+    question: string; // Add question prop
     answer: ChatAppResponse;
     isSelected?: boolean;
     isStreaming: boolean;
@@ -27,6 +30,7 @@ interface Props {
 }
 
 export const Answer = ({
+    question, // Add question prop
     answer,
     isSelected,
     isStreaming,
@@ -51,28 +55,80 @@ export const Answer = ({
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
-    const handleLikeClick = () => {
-        if (like) {
-            setLike(null);
-        } else {
-            setLike(true);
-            setDislike(null);
+    const saveLikeDislike = async (like: boolean | null, dislike: boolean | null) => {
+        const userProfileString = localStorage.getItem("userProfile");
+        const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
+
+        const userName = userProfile ? userProfile.email : "";
+
+        const message = `[Question:<${userName}>]: ${question}\n[Answer:<AI>]: ${messageContent}`;
+
+        const payload = {
+            id: null,
+            username: userName,
+            like,
+            dislike,
+            message,
+            reason
+        };
+
+        try {
+            const response = await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/feedback/add', payload);
+
+            if (response.status !== 200) {
+                throw new Error('Network response was not ok');
+            }
+
+            toast.success('Feedback saved successfully', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+
+            console.log('Successfully saved like/dislike');
+        } catch (error) {
+            toast.error('Failed to save feedback', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            console.error('Failed to save like/dislike:', error);
         }
+    };
+
+    const handleLikeClick = () => {
+        setLike((prevLike) => {
+            const newLike = prevLike ? null : true;
+            setDislike(null);
+            saveLikeDislike(newLike, null);
+            return newLike;
+        });
+
         console.log("Liked");
     };
 
     const handleDislikeClick = () => {
-        if (dislike) {
-            setDislike(null);
-        } else {
-            setDislike(true);
+        setDislike((prevDislike) => {
+            const newDislike = prevDislike ? null : true;
             setLike(null);
             setIsModalOpen(true);
-        }
+            return newDislike;
+        });
         console.log("Disliked");
     };
 
     const handleModalClose = () => {
+        if (!reason.trim()) {
+            setDislike(null);
+        }
         setIsModalOpen(false);
         setReason("");
     };
@@ -82,7 +138,7 @@ export const Answer = ({
     };
 
     const handleSubmitReason = () => {
-        console.log("Reason for dislike:", reason);
+        saveLikeDislike(null, true);
         handleModalClose();
     };
 
@@ -179,8 +235,19 @@ export const Answer = ({
                 </div>
                 <div className={styles.modalFooter}>
                     <Stack horizontal tokens={{ childrenGap: 10 }}>
-                        <DefaultButton onClick={handleSubmitReason} text="Submit" className={styles.modalSubmitBtn} />
-                        <DefaultButton onClick={handleModalClose} text="Cancel" className={styles.modalCloseBtn} />
+                        <MUIButton
+                            sx={{ backgroundColor: "#4ec0ad" }}
+                            variant="contained"
+                            onClick={handleSubmitReason}
+                            className={styles.modalSubmitBtn}
+                            disabled={!reason.trim()}
+
+                        >Submit </MUIButton>
+                        <MUIButton
+                            sx={{ backgroundColor: "#9e9e9e" }}
+                            variant="contained"
+                            onClick={handleModalClose}
+                            className={styles.modalCloseBtn}>Cancel</MUIButton>
                     </Stack>
                 </div>
             </Modal>

@@ -3,6 +3,9 @@ import { Checkbox, Panel, DefaultButton, TextField, ITextFieldProps, ICheckboxPr
 import { SparkleFilled } from "@fluentui/react-icons";
 import { useId } from "@fluentui/react-hooks";
 import readNDJSONStream from "ndjson-readablestream";
+import axios from 'axios'; // Import axios for API calls
+import { toast, ToastContainer } from 'react-toastify'; // Import react-toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify CSS
 
 import styles from "./Chat.module.css";
 
@@ -182,20 +185,64 @@ const Chat = () => {
             if (!response.body) {
                 throw Error("No response body");
             }
+            let parsedResponse: ChatAppResponse;
             if (shouldStream) {
-                const parsedResponse: ChatAppResponse = await handleAsyncRequest(question, answers, response.body);
+                parsedResponse = await handleAsyncRequest(question, answers, response.body);
                 setAnswers([...answers, [question, parsedResponse]]);
             } else {
-                const parsedResponse: ChatAppResponseOrError = await response.json();
+                const parsedResponseOrError: ChatAppResponseOrError = await response.json();
                 if (response.status > 299 || !response.ok) {
-                    throw Error(parsedResponse.error || "Unknown error");
+                    throw Error(parsedResponseOrError.error || "Unknown error");
                 }
-                setAnswers([...answers, [question, parsedResponse as ChatAppResponse]]);
+                parsedResponse = parsedResponseOrError as ChatAppResponse;
+                setAnswers([...answers, [question, parsedResponse]]);
             }
+            // Save the latest question and answer after receiving the answer
+            await saveConversation(question, parsedResponse);
         } catch (e) {
             setError(e);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const saveConversation = async (latestQuestion: string, latestAnswer: ChatAppResponse) => {
+        const userProfileString = localStorage.getItem("userProfile");
+        const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
+
+        const userName = userProfile ? userProfile.email : "User";
+        console.log(userName);
+
+        const conversation = `[Question:<${userName}>]: ${latestQuestion}\n[Answer:<AI>]: ${latestAnswer.message.content}`;
+
+        const payload = {
+            id: null,
+            username: userName,
+            details: conversation
+        };
+
+        try {
+            await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/conversation/add', payload);
+            // toast.success('Conversation saved successfully', {
+            //     position: "top-right",
+            //     autoClose: 3000,
+            //     hideProgressBar: false,
+            //     closeOnClick: true,
+            //     pauseOnHover: true,
+            //     draggable: true,
+            //     progress: undefined,
+            // });
+        } catch (error) {
+            console.error('Error saving conversation:', error);
+            toast.error('Failed to save conversation', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         }
     };
 
@@ -332,8 +379,12 @@ const Chat = () => {
 
     return (
         <div className={styles.container}>
+            <ToastContainer />
             <div className={styles.commandsContainer}>
                 <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                {/* <DefaultButton className={styles.commandButton}
+                    onClick={saveConversation} text="Save Conversation"
+                    disabled={answers.length === 0} /> */}
             </div>
 
             <div className={styles.commandsContainer} style={{ display: 'none' }}>
@@ -358,6 +409,7 @@ const Chat = () => {
                                         <UserChatMessage message={streamedAnswer[0]} />
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
+                                                question={lastQuestionRef.current}
                                                 isStreaming={true}
                                                 key={index}
                                                 answer={streamedAnswer[1]}
@@ -380,6 +432,7 @@ const Chat = () => {
                                         <UserChatMessage message={answer[0]} />
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
+                                                question={lastQuestionRef.current}
                                                 isStreaming={false}
                                                 key={index}
                                                 answer={answer[1]}

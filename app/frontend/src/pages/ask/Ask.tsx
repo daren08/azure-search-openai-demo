@@ -245,6 +245,7 @@ export function Component(): JSX.Element {
                 {!isLoading && answer && !error && (
                     <div className={styles.askAnswerContainer}>
                         <Answer
+                            question={lastQuestionRef.current}
                             answer={answer}
                             isStreaming={false}
                             onCitationClicked={x => onShowCitation(x)}
