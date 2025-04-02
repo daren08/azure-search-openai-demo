@@ -6,6 +6,7 @@ import readNDJSONStream from "ndjson-readablestream";
 import axios from 'axios'; // Import axios for API calls
 import { toast, ToastContainer } from 'react-toastify'; // Import react-toastify
 import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify CSS
+import { LoginButton } from "../../components/LoginButton"; // Import LoginButton
 
 import styles from "./Chat.module.css";
 
@@ -206,11 +207,47 @@ const Chat = () => {
         }
     };
 
+    // const testRelogin = async () => {
+    //     const latestQuestion = "test";
+    //     const latestAnswer: ChatAppResponse = {
+    //         message: { content: "test", role: "assistant" },
+    //         delta: { content: "test", role: "assistant" }, // Added delta property
+    //         session_state: null,
+    //         context: {
+    //             data_points: [],
+    //             followup_questions: [],
+    //             thoughts: []
+    //         }
+    //     };
+
+    //     await saveConversation(latestQuestion, latestAnswer);
+    // }
+
+
     const saveConversation = async (latestQuestion: string, latestAnswer: ChatAppResponse) => {
         const userProfileString = localStorage.getItem("userProfile");
         const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
 
-        const userName = userProfile ? userProfile.email : "User";
+        if (!userProfile) {
+            toast.error(
+                <div>
+                    Session Expired. Please re-login. <LoginButton />
+                </div>,
+                {
+                    position: "top-right",
+                    autoClose: false,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                }
+            );
+
+            return;
+        }
+
+        const userName = userProfile ? userProfile.email : "";
         console.log(userName);
 
         const conversation = `[Question:<${userName}>]: ${latestQuestion}\n[Answer:<AI>]: ${latestAnswer.message.content}`;
@@ -221,8 +258,19 @@ const Chat = () => {
             details: conversation
         };
 
+        const logPayload = {
+            id: null,
+            page: 'Chat.tsx',
+            action: 'saveConversation',
+            message: '',
+            userName: userName
+        };
+
         try {
-            await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/conversation/add', payload);
+            const result = await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/conversation/add', payload);
+
+            logPayload.message = 'Success - conversationId: ' + result.data.id;
+
             // toast.success('Conversation saved successfully', {
             //     position: "top-right",
             //     autoClose: 3000,
@@ -232,7 +280,7 @@ const Chat = () => {
             //     draggable: true,
             //     progress: undefined,
             // });
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error saving conversation:', error);
             toast.error('Failed to save conversation', {
                 position: "top-right",
@@ -243,8 +291,15 @@ const Chat = () => {
                 draggable: true,
                 progress: undefined,
             });
+
+            const errorMessage = (error as Error).message;
+
+            logPayload.message = errorMessage;
+        } finally {
+            await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/log/add', logPayload);
         }
     };
+
 
     const clearChat = () => {
         lastQuestionRef.current = "";
@@ -383,8 +438,7 @@ const Chat = () => {
             <div className={styles.commandsContainer}>
                 <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                 {/* <DefaultButton className={styles.commandButton}
-                    onClick={saveConversation} text="Save Conversation"
-                    disabled={answers.length === 0} /> */}
+                    onClick={testRelogin} text="Save Conversation" /> */}
             </div>
 
             <div className={styles.commandsContainer} style={{ display: 'none' }}>

@@ -5,6 +5,7 @@ import { Lightbulb, Assignment, ThumbUp, ThumbDown } from "@mui/icons-material"
 import DOMPurify from "dompurify";
 import axios from "axios";
 import { toast, ToastContainer } from 'react-toastify'; // Import react-toastify
+import { LoginButton } from "../LoginButton"; // Import LoginButton
 
 import styles from "./Answer.module.css";
 import { ChatAppResponse, getCitationFilePath } from "../../api";
@@ -59,7 +60,26 @@ export const Answer = ({
         const userProfileString = localStorage.getItem("userProfile");
         const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
 
-        const userName = userProfile ? userProfile.email : "";
+        if (!userProfile) {
+            toast.error(
+                <div>
+                    Session Expired. Please re-login. <LoginButton />
+                </div>,
+                {
+                    position: "top-right",
+                    autoClose: false,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                }
+            );
+
+            return;
+        }
+
+        const userName = userProfile.email;
 
         const message = `[Question:<${userName}>]: ${question}\n[Answer:<AI>]: ${messageContent}`;
 
@@ -69,17 +89,28 @@ export const Answer = ({
             like,
             dislike,
             message,
-            reason
+            reason,
+        };
+
+        const logPayload = {
+            id: null,
+            page: "Answer.tsx",
+            action: "saveLikeDislike",
+            message: "",
+            userName: userName,
         };
 
         try {
-            const response = await axios.post('https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/feedback/add', payload);
+            const response = await axios.post(
+                "https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/feedback/add",
+                payload
+            );
 
             if (response.status !== 200) {
-                throw new Error('Network response was not ok');
+                throw new Error("Network response was not ok");
             }
 
-            toast.success('Feedback saved successfully', {
+            toast.success("Feedback saved successfully", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -89,9 +120,11 @@ export const Answer = ({
                 progress: undefined,
             });
 
-            console.log('Successfully saved like/dislike');
-        } catch (error) {
-            toast.error('Failed to save feedback', {
+            logPayload.message = "Success - feedbackId: " + response.data.id;
+
+            console.log("Successfully saved like/dislike");
+        } catch (error: unknown) {
+            toast.error("Failed to save feedback", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -100,7 +133,17 @@ export const Answer = ({
                 draggable: true,
                 progress: undefined,
             });
-            console.error('Failed to save like/dislike:', error);
+
+            const errorMessage = (error as Error).message;
+
+            logPayload.message = errorMessage;
+
+            console.error("Failed to save like/dislike:", error);
+        } finally {
+            await axios.post(
+                "https://app-api-twg-azu-ai-inf-assist-d-01-fkfnera5h3cjhtfh.australiaeast-01.azurewebsites.net/api/log/add",
+                logPayload
+            );
         }
     };
 

@@ -9,11 +9,17 @@ from approaches.approach import Approach
 
 
 class ChatApproach(Approach, ABC):
+    # query_prompt_few_shots: list[ChatCompletionMessageParam] = [
+    #     {"role": "user", "content": "How did crypto do last year?"},
+    #     {"role": "assistant", "content": "Summarize Cryptocurrency Market Dynamics from last year"},
+    #     {"role": "user", "content": "What are my health plans?"},
+    #     {"role": "assistant", "content": "Show available health plans"},
+    # ]
     query_prompt_few_shots: list[ChatCompletionMessageParam] = [
         {"role": "user", "content": "How did crypto do last year?"},
         {"role": "assistant", "content": "Summarize Cryptocurrency Market Dynamics from last year"},
-        {"role": "user", "content": "What are my health plans?"},
-        {"role": "assistant", "content": "Show available health plans"},
+        {"role": "user", "content": "What is Infection Control Policy?"},
+        {"role": "assistant", "content": "Show available policies"},
     ]
     NO_RESPONSE = "0"
 
@@ -35,6 +41,16 @@ class ChatApproach(Approach, ABC):
     If the question is not in English, translate the question to English before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
+
+    # query_prompt_template = """You are an "Whiddon Company Knowledge Assistant" that helps the employees with their Policy and Procedures questions, and questions about the employee handbook. Be brief in your answers. Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question. For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question. Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf]. 
+    # You have access to Azure AI Search index with 100's of documents.
+    # Generate a search query based on the conversation and the new question.
+    # Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
+    # Do not include any text inside [] or <<>> in the search query terms.
+    # Do not include any special characters like '+'.
+    # If the question is not in English, translate the question to English before generating the search query.
+    # If you cannot generate a search query, return just the number 0.
+    # """
 
     @property
     @abstractmethod

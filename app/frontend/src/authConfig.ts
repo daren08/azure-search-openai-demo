@@ -51,6 +51,32 @@ interface AuthSetup {
     };
 }
 
+// Mock data for local testing
+const mockAuthSetup: AuthSetup = {
+    useLogin: true,
+    requireAccessControl: false,
+    enableUnauthenticatedAccess: true,
+    msalConfig: {
+        auth: {
+            clientId: "mock-client-id",
+            authority: "https://login.microsoftonline.com/mock-tenant-id",
+            redirectUri: "/",
+            postLogoutRedirectUri: "/",
+            navigateToLoginRequestUrl: true,
+        },
+        cache: {
+            cacheLocation: "localStorage",
+            storeAuthStateInCookie: false,
+        },
+    },
+    loginRequest: {
+        scopes: ["openid", "profile", "email"],
+    },
+    tokenRequest: {
+        scopes: ["api://mock-scope-id/access_as_user"],
+    },
+};
+
 // Fetch the auth setup JSON data from the API if not already cached
 async function fetchAuthSetup(): Promise<AuthSetup> {
     const response = await fetch("/auth_setup");
@@ -60,7 +86,9 @@ async function fetchAuthSetup(): Promise<AuthSetup> {
     return await response.json();
 }
 
-const authSetup = await fetchAuthSetup();
+// Use mock data for local testing
+//const authSetup = mockAuthSetup;
+const authSetup =  await fetchAuthSetup();
 
 export const useLogin = authSetup.useLogin;
 
