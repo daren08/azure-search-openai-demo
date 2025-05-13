@@ -150,6 +150,7 @@
     color: #1abc9c;
     cursor: pointer;
     margin-top: 10px;
+    margin-right: 10px;
 }
 
 /* Page Content */
@@ -229,3 +230,63 @@
     width: 10vh;
     cursor: pointer;
 }
+
+.newChatButton
+{
+    margin-top: 15px;
+    margin-left: 27px;
+    background-color: #f36f4c;
+    color: white;
+    border: 5px;
+    border-radius: 5px;
+    width: 70%;
+    height: 45%;
+    cursor: pointer;
+}
+
+.viewHistoryLbl
+{
+    font-weight: bold;
+    margin-left: 18px;
+}
+
+.container {
+    padding: 16px;
+    max-width: 250px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+.historyContainer {
+    margin-top: 16px;
+  }
+  
+  .historyDateRange {
+    font-size: 12px;
+    color: gray;
+    margin-bottom: 4px;
+  }
+  
+  .historyScroll {
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  
+  .historyGroup {
+    margin-bottom: 12px;
+  }
+  
+  .historyDate {
+    font-weight: bold;
+    font-size: 13px;
+    margin: 10px 0 4px;
+  }
+  
+  .historyItem {
+    color: #444;
+    font-size: 12px;
+    margin-bottom: 2px;
+    text-decoration: underline;
+    cursor: pointer;
+    line-height: 1.3;
+  }
