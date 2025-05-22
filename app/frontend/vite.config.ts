@@ -34,7 +34,14 @@ export default defineConfig({
             "/config": "http://127.0.0.1:50505",
             "/upload": "http://127.0.0.1:50505",
             "/delete_uploaded": "http://127.0.0.1:50505",
-            "/list_uploaded": "http://127.0.0.1:50505"
+            "/list_uploaded": "http://127.0.0.1:50505",
+            "/chunk_upload": "http://127.0.0.1:50505",
+            "/list_container_files": "http://127.0.0.1:50505",
+            "/delete_container_file": "http://127.0.0.1:50505",
+            "/reindex_after_delete": "http://127.0.0.1:50505",
+            "/reindex_file": "http://127.0.0.1:50505",
+            "/reindex_container_file": "http://127.0.0.1:50505",
+            "/download_container_file": "http://127.0.0.1:50505",
         }
     }
 });

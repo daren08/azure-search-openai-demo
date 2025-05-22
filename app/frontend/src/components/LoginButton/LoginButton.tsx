@@ -1,9 +1,12 @@
 import { DefaultButton } from "@fluentui/react";
 import { useMsal } from "@azure/msal-react";
+import axios from "axios";
+import { PublicClientApplication } from "@azure/msal-browser";
 
 import styles from "./LoginButton.module.css";
 import { getRedirectUri, loginRequest } from "../../authConfig";
 import { appServicesToken, appServicesLogout } from "../../authConfig";
+import { fetchUserProfile } from "../../utils/userProfileUtils";
 
 interface LoginButtonProps {
     onLogin?: () => void;
@@ -29,6 +32,16 @@ export const LoginButton: React.FC<LoginButtonProps> = ({ onLogin, onLogout }) =
             .then(() => {
                 localStorage.setItem("isLoggedIn", "true");
                 onLogin && onLogin(); // Notify MainLayout about login
+                console.log("Dispatching userProfileUpdated event");
+                window.dispatchEvent(new Event("whiddon-userProfileUpdated")); // Notify other components about login
+
+                // Store user profile and picture in localStorage
+                fetchUserProfile(instance as PublicClientApplication).then(userData => {
+                    if (userData) {
+                        console.log("User profile fetched successfully:", userData);
+                        window.dispatchEvent(new Event("whiddon-userProfileUpdated"));
+                    }
+                }).catch((error: any) => console.error("Error in fetchUserProfile:", error));
             })
             .catch(error => console.log(error));
     };
@@ -56,6 +69,6 @@ export const LoginButton: React.FC<LoginButtonProps> = ({ onLogin, onLogout }) =
         //     onClick={isLoggedIn ? handleLogoutPopup : handleLoginPopup}
         // ></DefaultButton>
         <button className={styles.loginButton}
-        onClick={isLoggedIn ? handleLogoutPopup : handleLoginPopup}>{isLoggedIn ? logoutText : "Get Started"}</button>
+            onClick={isLoggedIn ? handleLogoutPopup : handleLoginPopup}>{isLoggedIn ? logoutText : "Get Started"}</button>
     );
 };

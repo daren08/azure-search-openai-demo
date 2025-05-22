@@ -120,3 +120,100 @@ export async function listUploadedFilesApi(idToken: string): Promise<string[]> {
     const dataResponse: string[] = await response.json();
     return dataResponse;
 }
+
+
+export async function chunkUploadApi(
+    formData: FormData,
+    idToken: string
+): Promise<{ message: string }> {
+    const response = await fetch(`/chunk_upload`, {
+        method: "POST",
+        headers: getHeaders(idToken),
+        body: formData
+    });
+    if (!response.ok) {
+        throw new Error(`Chunk upload failed: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
+export interface ContainerFileInfo {
+    name: string;
+    size: number;
+    last_modified: string;
+}
+
+export async function listContainerFilesApi(idToken: string): Promise<ContainerFileInfo[]> {
+    const response = await fetch(`/list_container_files`, {
+        method: "GET",
+        headers: getHeaders(idToken)
+    });
+    if (!response.ok) {
+        throw new Error(`Listing files failed: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
+export async function deleteContainerFileApi(filename: string, idToken: string, userId: string): Promise<SimpleAPIResponse> {
+    // Delete from blob storage
+    const response = await fetch("/delete_container_file", {
+        method: "POST",
+        headers: { ...getHeaders(idToken), "Content-Type": "application/json" },
+        body: JSON.stringify({ filename })
+    });
+    if (!response.ok) {
+        throw new Error(`Deleting file failed: ${response.statusText}`);
+    }
+    const result = await response.json();
+
+    // Call reindex_after_delete to update search index
+    try {
+        await fetch("/reindex_after_delete", {
+            method: "POST",
+            headers: { ...getHeaders(idToken), "Content-Type": "application/json" },
+            body: JSON.stringify({ filename, userId })
+        });
+    } catch (e) {
+        // Optionally handle error, but don't block UI
+        console.error("Failed to call reindex_after_delete", e);
+    }
+    return result;
+}
+
+export async function reindexContainerFileApi(filename: string, idToken: string, userId: string): Promise<{ message: string }> {
+    const response = await fetch("/reindex_container_file", {
+        method: "POST",
+        headers: { ...getHeaders(idToken), "Content-Type": "application/json" },
+        body: JSON.stringify({ filename, userid: userId })
+    });
+    if (!response.ok) {
+        throw new Error(`Reindexing file failed: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
+export async function downloadContainerFileApi(filename: string, idToken: string): Promise<void> {
+    const response = await fetch(`/download_container_file?filename=${encodeURIComponent(filename)}`, {
+        method: "GET",
+        headers: getHeaders(idToken)
+    });
+    if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+    }
+    // Get filename from Content-Disposition header if available
+    const disposition = response.headers.get("Content-Disposition");
+    let downloadName = filename;
+    if (disposition) {
+        const match = disposition.match(/filename="?([^";]+)"?/);
+        if (match) downloadName = match[1];
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = downloadName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+}

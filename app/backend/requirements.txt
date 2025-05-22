@@ -458,3 +458,8 @@ zipp==3.19.2
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+asyncpg
+pdfminer.six
+fpdf
+azure.cosmos
+opencensus-ext-azure==1.1.11

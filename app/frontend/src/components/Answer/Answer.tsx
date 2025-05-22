@@ -57,7 +57,7 @@ export const Answer = ({
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
     const saveLikeDislike = async (like: boolean | null, dislike: boolean | null) => {
-        const userProfileString = localStorage.getItem("userProfile");
+        const userProfileString = localStorage.getItem("whiddon-userProfile");
         const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
 
         if (!userProfile) {

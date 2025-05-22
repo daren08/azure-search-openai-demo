@@ -1,0 +1,24 @@
+.infoIcon {
+    font-size: 24px;
+    color: #1abc9c;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.logoutContainer
+{
+    display:flex;
+}
+
+.logoutButton
+{
+    margin-top: 1px;
+    margin-left: 10px;
+    background-color: #f36f4c;
+    color: white;
+    border: 5px;
+    border-radius: 5px;
+    width: 10vh;
+    cursor: pointer;
+}

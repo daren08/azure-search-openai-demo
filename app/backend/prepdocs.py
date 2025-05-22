@@ -213,6 +213,7 @@ async def main(strategy: Strategy, setup_index: bool = True):
     await strategy.run()
 
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Prepare documents by extracting content from PDFs, splitting content into sections, uploading to blob storage, and indexing in a search index.",

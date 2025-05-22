@@ -225,7 +225,7 @@ const Chat = () => {
 
 
     const saveConversation = async (latestQuestion: string, latestAnswer: ChatAppResponse) => {
-        const userProfileString = localStorage.getItem("userProfile");
+        const userProfileString = localStorage.getItem("whiddon-userProfile");
         const userProfile = userProfileString ? JSON.parse(userProfileString) : null;
 
         if (!userProfile) {
